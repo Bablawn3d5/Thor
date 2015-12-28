@@ -2,23 +2,23 @@
 ##
 ## Thor C++ Library
 ## Copyright (c) 2011-2015 Jan Haller
-## 
+##
 ## This software is provided 'as-is', without any express or implied
 ## warranty. In no event will the authors be held liable for any damages
 ## arising from the use of this software.
-## 
+##
 ## Permission is granted to anyone to use this software for any purpose,
 ## including commercial applications, and to alter it and redistribute it
 ## freely, subject to the following restrictions:
-## 
+##
 ## 1. The origin of this software must not be misrepresented; you must not
 ##    claim that you wrote the original software. If you use this software
 ##    in a product, an acknowledgment in the product documentation would be
 ##    appreciated but is not required.
-## 
+##
 ## 2. Altered source versions must be plainly marked as such, and must not be
 ##    misrepresented as being the original software.
-## 
+##
 ## 3. This notice may not be removed or altered from any source distribution.
 ##
 #################################################################################
@@ -51,6 +51,7 @@ include_directories(${PROJECT_SOURCE_DIR}/extlibs/aurora/include)
 set(THOR_SHARED_LIBS TRUE CACHE BOOL "Build shared libraries (use shared SFML librares)")
 set(THOR_BUILD_EXAMPLES FALSE CACHE BOOL "Build example projects")
 set(THOR_BUILD_DOC FALSE CACHE BOOL "Create HTML documentation (requires Doxygen)")
+option(THOR_SFML_IS_BUILT "Set to automatically link SFML includes, as you build the enitre SFML source as part of your project" OFF)
 
 # Windows: Choose to link CRT libraries statically or dynamically
 if(WIN32)
@@ -87,12 +88,12 @@ if(CMAKE_COMPILER_IS_GNUCXX)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 	set(THOR_CLANG_STDLIB "" CACHE STRING "Chose standard library (libstdc++ or libc++) or leave empty for default")
-	
+
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -Wno-switch -Wno-logical-op-parentheses")
 	if(NOT THOR_CLANG_STDLIB STREQUAL "")
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=${THOR_CLANG_STDLIB}")
 	endif()
-	
+
 	add_definitions(-DTHOR_USE_STD_RANDOMENGINE) # Workaround for libc++ bug
 endif()
 
@@ -115,16 +116,21 @@ set (CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Modules/;${CMAKE_MODULE_PATH
 if(NOT THOR_SHARED_LIBS)
 	set(SFML_STATIC_LIBRARIES TRUE)
 endif()
-find_package(SFML 2 COMPONENTS audio graphics window system)
 
-if(SFML_FOUND)
-	include_directories(${SFML_INCLUDE_DIR})
+if(THOR_SFML_IS_BUILT)
+	include_directories(${SFML_SOURCE_DIR}/include)
+    set(SFML_LIBRARIES "sfml-audio" "sfml-window" "sfml-graphics" "sfml-system")
 else()
-	set(SFML_ROOT "" CACHE PATH "SFML top-level directory")
-	message("\n-> SFML directory not found. Set SFML_ROOT to SFML's top-level path (containing \"include\" and \"lib\" directories).")
-	message("-> Make sure the SFML libraries with the same configuration (Release/Debug, Static/Dynamic) exist.\n")
-endif()
+	find_package(SFML 2 COMPONENTS audio graphics window system)
 
+	if(SFML_FOUND)
+		include_directories(${SFML_INCLUDE_DIR})
+	else()
+		set(SFML_ROOT "" CACHE PATH "SFML top-level directory")
+		message("\n-> SFML directory not found. Set SFML_ROOT to SFML's top-level path (containing \"include\" and \"lib\" directories).")
+		message("-> Make sure the SFML libraries with the same configuration (Release/Debug, Static/Dynamic) exist.\n")
+	endif()
+endif()
 
 # Macro to link SFML
 macro(thor_link_sfml THOR_TARGET)
@@ -166,6 +172,6 @@ install(FILES License.txt
 install(FILES extlibs/aurora/License.txt
 		RENAME LicenseAurora.txt
 		DESTINATION ${THOR_DOC_INSTALL_DIR})
-		
+
 install(DIRECTORY extlibs/aurora/include
 		DESTINATION .)
