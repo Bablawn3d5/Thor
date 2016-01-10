@@ -1,7 +1,7 @@
 #################################################################################
 ##
 ## Thor C++ Library
-## Copyright (c) 2011-2015 Jan Haller
+## Copyright (c) 2011-2016 Jan Haller
 ##
 ## This software is provided 'as-is', without any express or implied
 ## warranty. In no event will the authors be held liable for any damages
@@ -147,6 +147,11 @@ macro(thor_link_thor THOR_TARGET)
 endmacro()
 
 
+# Enable IDE folders and set them for predefined CMake projects
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "CMake")
+
+
 # Documentation
 if(THOR_BUILD_DOC)
 	add_subdirectory(doc)
@@ -164,6 +169,9 @@ endif()
 # Install include directory and license files
 install(DIRECTORY include
 		DESTINATION .)
+
+install(FILES cmake/Modules/FindThor.cmake
+		DESTINATION ./cmake/Modules/)
 
 install(FILES License.txt
 		RENAME LicenseThor.txt
