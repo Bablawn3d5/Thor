@@ -119,7 +119,7 @@ endif()
 
 if(THOR_SFML_IS_BUILT)
 	include_directories(${SFML_SOURCE_DIR}/include)
-    set(SFML_LIBRARIES "sfml-audio" "sfml-window" "sfml-graphics" "sfml-system")
+    set(SFML_LIBRARIES "sfml-graphics" "sfml-window" "sfml-audio" "sfml-system")
 else()
 	find_package(SFML 2 COMPONENTS audio graphics window system)
 
